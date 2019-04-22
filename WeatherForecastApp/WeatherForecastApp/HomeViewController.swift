@@ -30,6 +30,8 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     var dataResultForDayDict: [String:[List]] = [:]
     var datesInOrder: [String] = []
     
+    var selectedData: List?
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
@@ -44,6 +46,10 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                 let responseModel = try jsonDecoder.decode(Json4Swift_Base.self, from: data!)
                 
                 if let list = responseModel.list {
+                    
+                    self.dateForDayDict.removeAll()
+                    self.dataResultForDayDict.removeAll()
+                    self.datesInOrder.removeAll()
                     print("List = ", list)
     
                     // list
@@ -85,6 +91,8 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
                         }
                         
                         // show network error
+                        let alertController = UIAlertController(title: "Error", message: "Please check your connection and try again", preferredStyle: .alert)
+                        self.present(alertController, animated: true, completion: nil)
                     }
                     
                     // for item in list
@@ -101,6 +109,8 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
             } catch {
                 print("JSON Serialization error")
                 // Show error alert
+                let alertController = UIAlertController(title: "Error", message: "Please check your connection and try again", preferredStyle: .alert)
+                self.present(alertController, animated: true, completion: nil)
             }
         }).resume()
 
@@ -139,6 +149,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        selectedData = dataResultForDayDict[datesInOrder[indexPath.section]]![indexPath.row]
         self.performSegue(withIdentifier: "MoreDetails", sender: datesInOrder[indexPath.section])
     }
     
@@ -170,6 +181,7 @@ class HomeViewController: UIViewController, UITableViewDataSource, UITableViewDe
         if segue.identifier == "MoreDetails" {
             let vc = segue.destination as! DetailsViewController
             vc.dateString = sender as! String
+            vc.data = selectedData
         }
     }
  
